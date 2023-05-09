@@ -1,0 +1,569 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Friends Service (VK Internship)"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api"
+    }
+  ],
+  "paths": {
+    "/create-user": {
+      "post": {
+        "summary": "Create a new user. Returns access and refresh tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/loginData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Correct login data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authTokens"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "409": {
+            "description": "Username is already taken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/incorrectData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/token": {
+      "post": {
+        "summary": "Authentication. Returns access and refresh tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/loginData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Correct login data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authTokens"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "description": "Invalid login data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/incorrectData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/token/refresh": {
+      "post": {
+        "summary": "Refresh JWT. Returns access and refresh tokens",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/refreshToken"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Valid refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authTokens"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "description": "Invalid refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/incorrectData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/friends/send-request": {
+      "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Send a friend request",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/usernameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Friend request already has been sent"
+          },
+          "201": {
+            "description": "Friend request was sent"
+          },
+          "202": {
+            "description": "Friend request was sent and automatically accepted due to counter request"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserDoesNotExist"
+          }
+        }
+      }
+    },
+    "/friends/respond-to-request": {
+      "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Accept/refuse a friend request",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/respondToRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Friend request successfully refused"
+          },
+          "202": {
+            "description": "Friend request successfully accepted"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserOrRequestDoesNotExist"
+          }
+        }
+      }
+    },
+    "/friends/revoke-request": {
+      "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Revoke a previously sent friend request",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/usernameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Friend request successfully revoked"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserOrRequestDoesNotExist"
+          }
+        }
+      }
+    },
+    "/friends/get-incoming-requests": {
+      "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Returns a list of users who have sent you a friend request",
+        "responses": {
+          "200": {
+            "description": "List of users who have sent a friend request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listOfUsers"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          }
+        }
+      }
+    },
+    "/friends/get-outgoing-requests": {
+      "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Returns a list of users to whom you have sent a friend request",
+        "responses": {
+          "200": {
+            "description": "List of users to whom you have sent a friend request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listOfUsers"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          }
+        }
+      }
+    },
+    "/friends/get-friends": {
+      "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Returns list of friends",
+        "responses": {
+          "200": {
+            "description": "List of friends",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/listOfUsers"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          }
+        }
+      }
+    },
+    "/friends/get-status-with-user/{username}": {
+      "get": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Returns your status of friendship with {username}",
+        "responses": {
+          "200": {
+            "description": "Status of friendship with {username}",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/friendshipStatus"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserDoesNotExist"
+          }
+        }
+      }
+    },
+    "/friends/remove-friend": {
+      "post": {
+        "security": [
+          {
+            "Bearer": []
+          }
+        ],
+        "summary": "Remove a user from your friends list",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/usernameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User was not in your friends list"
+          },
+          "202": {
+            "description": "User successfully removed from your friends list"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidAccessToken"
+          },
+          "404": {
+            "$ref": "#/components/responses/UserDoesNotExist"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "responses": {
+      "InvalidAccessToken": {
+        "description": "Invalid access token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/incorrectData"
+            }
+          }
+        }
+      },
+      "InvalidRequest": {
+        "description": "Invalid request",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "#invalidRequestField": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserOrRequestDoesNotExist": {
+        "description": "User or friend request does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/incorrectData"
+            }
+          }
+        }
+      },
+      "UserDoesNotExist": {
+        "description": "User does not exist",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/incorrectData"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "loginData": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "authTokens": {
+        "type": "object",
+        "required": [
+          "refresh",
+          "access"
+        ],
+        "properties": {
+          "access": {
+            "type": "string"
+          },
+          "refresh": {
+            "type": "string"
+          }
+        }
+      },
+      "incorrectData": {
+        "type": "object",
+        "required": [
+          "details"
+        ],
+        "properties": {
+          "details": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "refreshToken": {
+        "type": "object",
+        "required": [
+          "refresh"
+        ],
+        "properties": {
+          "refresh": {
+            "type": "string"
+          }
+        }
+      },
+      "usernameRequest": {
+        "type": "object",
+        "required": [
+          "username"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          }
+        }
+      },
+      "respondToRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "action"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "action": {
+            "type": "boolean"
+          }
+        }
+      },
+      "listOfUsers": {
+        "type": "object",
+        "required": [
+          "usernames"
+        ],
+        "properties": {
+          "usernames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "friendshipStatus": {
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "friends",
+              "has_incoming_request",
+              "outgoing_request_sent",
+              "nothing"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ]
+}
